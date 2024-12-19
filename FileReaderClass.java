@@ -9,61 +9,97 @@ public class FileReaderClass {
     private String[][] routes;
     private String firstCity;
     private String endCity;
+    private boolean isValidFile = true;
 
     public void readInput(String filePath) {
         try (Scanner sc = new Scanner(new File(filePath))) {
+            int lineNumber = 1;
 
-            numberOfCities = Integer.parseInt(sc.nextLine().trim());
-
-
-            cityNames = sc.nextLine().trim().split(" ");
-
-
-            numberOfRoutes = Integer.parseInt(sc.nextLine().trim());
-
-
-            routes = new String[numberOfRoutes][3];
-            for (int i = 0; i < numberOfRoutes; i++) {
-                String[] routeData = sc.nextLine().trim().split(" ");
-                if (routeData.length == 3) {
-                    routes[i] = routeData;
-                } else {
-                    System.err.println("Invalid route format at line " + (i + 4));
-                    i--; 
+            // Number of Cities
+            if (sc.hasNextLine()) {
+                try {
+                    numberOfCities = Integer.parseInt(sc.nextLine().trim());
+                    lineNumber++;
+                } catch (NumberFormatException e) {
+                    System.err.println("Error Line: " + lineNumber + " Invalid number of cities.");
+                    isValidFile = false;
+                    return;
                 }
             }
 
-            String[] startEndCities = sc.nextLine().trim().split(" ");
-            if (startEndCities.length == 2) {
+            // City Names
+            if (sc.hasNextLine()) {
+                cityNames = sc.nextLine().trim().split(" ");
+                lineNumber++;
+                if (cityNames.length != numberOfCities) {
+                    System.err.println("Error Line: " + lineNumber + " City count mismatch.");
+                    isValidFile = false;
+                    return;
+                }
+            }
+
+            // Number of Routes
+            if (sc.hasNextLine()) {
+                try {
+                    numberOfRoutes = Integer.parseInt(sc.nextLine().trim());
+                    lineNumber++;
+                } catch (NumberFormatException e) {
+                    System.err.println("Error Line: " + lineNumber + " Invalid number of routes.");
+                    isValidFile = false;
+                    return;
+                }
+            }
+
+            // Routes
+            routes = new String[numberOfRoutes][3];
+            for (int i = 0; i < numberOfRoutes; i++) {
+                if (sc.hasNextLine()) {
+                    String[] routeData = sc.nextLine().trim().split(" ");
+                    lineNumber++;
+                    if (routeData.length != 3) {
+                        System.err.println("Error Line: " + lineNumber + " Invalid route format.");
+                        isValidFile = false;
+                        return;
+                    }
+                    try {
+                        Integer.parseInt(routeData[2]);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error Line: " + lineNumber + " Invalid time format.");
+                        isValidFile = false;
+                        return;
+                    }
+                    routes[i] = routeData;
+                } else {
+                    System.err.println("Error Line: " + lineNumber + " Missing route data.");
+                    isValidFile = false;
+                    return;
+                }
+            }
+
+            // Start and End Cities
+            if (sc.hasNextLine()) {
+                String[] startEndCities = sc.nextLine().trim().split(" ");
+                lineNumber++;
+                if (startEndCities.length != 2) {
+                    System.err.println("Error Line: " + lineNumber + " Invalid start and end cities format.");
+                    isValidFile = false;
+                    return;
+                }
                 firstCity = startEndCities[0];
                 endCity = startEndCities[1];
             } else {
-                System.err.println("Invalid start and end cities format.");
+                System.err.println("Error Line: " + lineNumber + " Missing start and end cities.");
+                isValidFile = false;
+                return;
             }
+
+            if (isValidFile) {
+                System.out.println("File read is successful!");
+            }
+
         } catch (IOException e) {
             System.err.println("Error reading the file: " + e.getMessage());
-        } catch (NumberFormatException e) {
-            System.err.println("Invalid number format: " + e.getMessage());
-        } 
-    }
-
-    public void displayMapData() {
-        System.out.println("Number of Cities: " + numberOfCities);
-        System.out.println("City Names: " + String.join(", ", cityNames));
-        System.out.println("Number of Routes: " + numberOfRoutes);
-        for (int i = 0; i < numberOfRoutes; i++) {
-            System.out.println("Route: " + routes[i][0] + " to " + routes[i][1] + " takes " + routes[i][2] + " minutes");
         }
-        System.out.println("Start City: " + firstCity);
-        System.out.println("End City: " + endCity);
-    }
-
-    public void read() {
-
-
-        FileReaderClass fileReader = new FileReaderClass();
-        fileReader.readInput("D:\\Desktop\\New folder (4)\\CityMap\\src\\Test.txt");
-        fileReader.displayMapData();
     }
 
     public int getNumberOfCities() {
@@ -89,5 +125,4 @@ public class FileReaderClass {
     public String getEndCity() {
         return endCity;
     }
-
 }
